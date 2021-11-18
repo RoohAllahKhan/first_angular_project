@@ -8,26 +8,33 @@ import {Subject} from "rxjs";
 export class RecipeService {
   recipesChanged = new Subject<Recipe[]>();
 
-  private recipes: Recipe[] = [
-    new Recipe(
-      'Rotisserie Chicken Recipe',
-      'This is simply a test',
-      'https://www.licious.in/blog/wp-content/uploads/2020/12/Roast-Chicken-600x600.jpg',
-      [
-        new Ingredient('Chicken', 2),
-        new Ingredient('French Fries', 20)
-      ]),
-    new Recipe(
-      'Pizza Recipe',
-      'This is simply another test',
-      'https://www.biggerbolderbaking.com/wp-content/uploads/2019/07/15-Minute-Pizza-WS-Thumbnail.png',
-      [
-        new Ingredient('Chicken', 5),
-        new Ingredient('Cheese', 2),
-      ])
-  ];
+  // private recipes: Recipe[] = [
+  //   new Recipe(
+  //     'Rotisserie Chicken Recipe',
+  //     'This is simply a test',
+  //     'https://www.licious.in/blog/wp-content/uploads/2020/12/Roast-Chicken-600x600.jpg',
+  //     [
+  //       new Ingredient('Chicken', 2),
+  //       new Ingredient('French Fries', 20)
+  //     ]),
+  //   new Recipe(
+  //     'Pizza Recipe',
+  //     'This is simply another test',
+  //     'https://www.biggerbolderbaking.com/wp-content/uploads/2019/07/15-Minute-Pizza-WS-Thumbnail.png',
+  //     [
+  //       new Ingredient('Chicken', 5),
+  //       new Ingredient('Cheese', 2),
+  //     ])
+  // ];
+
+  private recipes: Recipe[]
 
   constructor(private shoppingListService: ShoppingListService) {}
+
+  setRecipes(recipes: Recipe[]) {
+    this.recipes = recipes;
+    this.recipesChanged.next(this.recipes.slice());
+  }
 
   getRecipes() {
     return this.recipes.slice();

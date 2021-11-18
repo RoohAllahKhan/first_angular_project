@@ -27,7 +27,7 @@ export class RecipeService {
   //     ])
   // ];
 
-  private recipes: Recipe[]
+  private recipes: Recipe[];
 
   constructor(private shoppingListService: ShoppingListService) {}
 
@@ -37,7 +37,9 @@ export class RecipeService {
   }
 
   getRecipes() {
-    return this.recipes.slice();
+    if (this.recipes) {
+      return this.recipes.slice();
+    }
   }
 
   getRecipe(index: number) {

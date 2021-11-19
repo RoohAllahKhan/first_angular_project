@@ -1,6 +1,8 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { catchError, throwError } from "rxjs";
+import { Router } from "@angular/router";
+import { BehaviorSubject, catchError, tap, throwError } from "rxjs";
+import { User } from "./user.model";
 
 export interface AuthResponseData {
     kind: string;
@@ -14,8 +16,9 @@ export interface AuthResponseData {
 
 @Injectable({providedIn: 'root'})
 export class AuthService {
+    user = new BehaviorSubject<User>(null);
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient, private router: Router) {}
     
     signup(email: string, password: string) {
         return this.http.post<AuthResponseData>(
@@ -25,7 +28,9 @@ export class AuthService {
                  password: password,
                  returnSecureToken: true
              }
-        ).pipe(catchError(this.handleError));
+        ).pipe(catchError(this.handleError), tap(resData => {
+            this.handleAuthentication(resData.email, resData.localId, resData.idToken, +resData.expiresIn);
+        }));
     }
 
     login(email: string, password: string) {
@@ -37,7 +42,21 @@ export class AuthService {
             returnSecureToken: true
             }
         )
-        .pipe(catchError(this.handleError));
+        .pipe(catchError(this.handleError), tap(resData => {
+            this.handleAuthentication(resData.email, resData.localId, resData.idToken, +resData.expiresIn);
+        }));
+    }
+
+    private handleAuthentication(
+        email: string, 
+        userId: string, 
+        token: string, 
+        expiresIn: number
+    ) {
+        const expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
+        const user = new User(email, userId, token,expirationDate);
+        this.user.next(user);
+        localStorage.setItem('userData', JSON.stringify(user));
     }
 
     private handleError(errorRes: HttpErrorResponse) {
@@ -57,5 +76,32 @@ export class AuthService {
                 break;        
         }
         return throwError(errorMessage);
+    }
+
+    autoLogin() {
+        const userData: {
+            email: string;
+            id: string;
+            _token: string;
+            _tokenExpirationData: string;
+        } = JSON.parse(localStorage.getItem('userData'));
+        if (!userData) {
+            return;
+        }
+        const loadedUser = new User(
+            userData.email, 
+            userData.id, 
+            userData._token, 
+            new Date(userData._tokenExpirationData)
+            );
+        
+        if (loadedUser.token) {
+            this.user.next(loadedUser);
+        }
+    }
+
+    logout() {
+        this.user.next(null);
+        this.router.navigate(['/auth']);
     }
 }

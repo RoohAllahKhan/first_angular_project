@@ -1,15 +1,28 @@
 import { Ingredient } from "../../shared/ingredient.model";
 import * as ShoppingListActions from "./shopping-list.actions";
 
-const initialState = {
+export interface State {
+    ingredients: Ingredient[];
+    editedIngredient: Ingredient;
+    editedIngredientIndex: number;
+}
+
+
+export interface AppState {
+    shoppingList: State;
+}
+
+const initialState: State = {
     ingredients: [
         new Ingredient('Tomatoes', 10),
         new Ingredient('Apples', 5)
-    ]
+    ],
+    editedIngredient: null,
+    editedIngredientIndex: -1
 };
 // Reducer will get two arguments automatically
 //First when out app will run, it will be in initial state
-export function shoppingListReducer(state = initialState, action: ShoppingListActions.ShoppingListActions) {
+export function shoppingListReducer(state: State = initialState, action: ShoppingListActions.ShoppingListActions) {
     switch (action.type) {
         case ShoppingListActions.ADD_INGREDIENT:
             return {
